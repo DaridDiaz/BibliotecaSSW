@@ -2,13 +2,13 @@ const ObjectId = require('mongodb').ObjectId;
 const getDb = require('../mongodb');
 
 let db = null;
-class Empleados {
+class Libros {
   collection = null;
   constructor() {
     getDb()
       .then((database) => {
         db = database;
-        this.collection = db.collection('Empleados');
+        this.collection = db.collection('Libros');
         if (process.env.MIGRATE === 'true') {
           // Por Si se ocupa algo
         }
@@ -16,15 +16,15 @@ class Empleados {
       .catch((err) => { console.error(err) });
   }
 
-  async new(nombres, apellidos, identidad, telefono, correo) {
-    const newEmpleado = {
-      nombres,
-      apellidos,
-      identidad,
-      telefono,
-      correo
+  async new(autor, titulo, editorial, anio_publicacion, numero_paginas) {
+    const newLibro = {
+      autor,
+      titulo,
+      editorial,
+      anio_publicacion,
+      numero_paginas
     };
-    const rslt = await this.collection.insertOne(newEmpleado);
+    const rslt = await this.collection.insertOne(newLibro);
     return rslt;
   }
 
@@ -54,15 +54,15 @@ class Empleados {
     const myDocument = await this.collection.findOne(filter);
     return myDocument;
   }
-  async updateOne(id, nombres, apellidos, identidad, telefono, correo) {
+  async updateOne(id, autor, titulo, editorial, anio_publicacion, numero_paginas) {
     const filter = {_id: new ObjectId(id)};
     const updateCmd = {
       '$set':{
-        nombres,
-        apellidos,
-        identidad,
-        telefono,
-        correo
+        autor,
+        titulo,
+        editorial,
+        anio_publicacion,
+        numero_paginas
       }
     };
     return await this.collection.updateOne(filter, updateCmd);
@@ -115,4 +115,4 @@ class Empleados {
   }
 }
 
-module.exports = Empleados;
+module.exports = Libros;

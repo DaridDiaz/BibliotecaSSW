@@ -1,21 +1,42 @@
 const express = require('express');
 const router = express.Router();
+
 const { verifyApiHeaderToken } =
   require('./headerVerifyMiddleware');
-const middlewares = require('./headerVerifyMiddleware');
 
-const pacientesRoutes = require('./pacientes/pacientes');
-const clientesRoutes = require('./clientes/clientes');
-//middlewares
+const {passport, jwtMiddleware} = require('./seguridad/jwtHelper');
+
+const empleadosRoutes = require('./empleados/empleados');
+const librosRoutes = require('./libros/libros');
+const prestamosRoutes = require('./prestamos/prestamos');
+const seguridadRoutes = require('./seguridad/seguridad');
+// const expedientesRoutes = require('./expedientes/expedientes');
+router.use(passport.initialize());
+//public
+
+router.use('/seguridad', verifyApiHeaderToken, seguridadRoutes);
+
+//************middlewares
+//Empleados
 router.use(
-  '/pacientes',
+  '/empleados',
   verifyApiHeaderToken,
-  pacientesRoutes
+  empleadosRoutes
 );
+
+//Libros
 router.use(
-  '/clientes', 
+  '/libros',
   verifyApiHeaderToken,
-  clientesRoutes
+  librosRoutes
 );
+
+//Prestamos
+router.use(
+  '/prestamos',
+  verifyApiHeaderToken,
+  prestamosRoutes
+);
+// router.use('/expedientes', expedientesRoutes);
 
 module.exports = router;

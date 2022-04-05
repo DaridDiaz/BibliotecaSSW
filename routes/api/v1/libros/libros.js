@@ -1,35 +1,34 @@
 const express = require('express');
 const router = express.Router();
 
-const Empleados = require('../../../../dao/empleados/empleados.model');
-const empleadoModel = new Empleados();
+const Libros = require('../../../../dao/libros/libros.model');
+const librosModel = new Libros();
 
 router.get('/', (req, res) => {
   res.status(200).json(
     {
-      endpoint: 'Empleados',
+      endpoint: 'Libros',
       updates: new Date(2022,0,19,18,41,0)
     }
   );
-}); //GET /
+});
 
 router.get('/all', async (req, res) => {
   try {
     console.log("User Request", req.user);
-    const rows = await empleadoModel.getAll();
-    res.status(200).json({status:'ok', empleados: rows});
+    const rows = await librosModel.getAll();
+    res.status(200).json({status:'ok', libros: rows});
   } catch (ex) {
     console.log(ex);
     res.status(500).json({status:'failed'});
   }
 } );
-
-
+// /byid/1;
 router.get('/byid/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const row = await empleadoModel.getById(id);
-    res.status(200).json({ status: 'ok', empleado: row });
+    const row = await librosModel.getById(id);
+    res.status(200).json({ status: 'ok', libro: row });
   } catch (ex) {
     console.log(ex);
     res.status(500).json({ status: 'failed' });
@@ -43,8 +42,8 @@ router.get('/facet/:page/:items', async (req, res) => {
   const items = parseInt(req.params.items, 10);
   if (allowedItemsNumber.includes(items)) {
     try {
-      const empleados = await empleadoModel.getFaceted(page, items);
-      res.status(200).json({docs:empleados});
+      const libros = await librosModel.getFaceted(page, items);
+      res.status(200).json({docs:libros});
     } catch (ex) {
       console.log(ex);
       res.status(500).json({ status: 'failed' });
@@ -61,8 +60,8 @@ router.get('/byname/:name/:page/:items', async (req, res) => {
   const items = parseInt(req.params.items, 10);
   if (allowedItemsNumber.includes(items)) {
     try {
-      const empleados = await empleadoModel.getFaceted(page, items, {nombres: name});
-      res.status(200).json({ docs: empleados });
+      const libros = await librosModel.getFaceted(page, items, {titulo: name});
+      res.status(200).json({ docs: libros });
     } catch (ex) {
       console.log(ex);
       res.status(500).json({ status: 'failed' });
@@ -74,9 +73,9 @@ router.get('/byname/:name/:page/:items', async (req, res) => {
 });
 
 router.post('/new', async (req, res) => {
-  const { nombres, apellidos, identidad, email, telefono } = req.body;
+  const { autor, titulo, editorial, anio_publicacion, numero_paginas } = req.body;
   try {
-    rslt = await empleadoModel.new(nombres, apellidos, identidad, telefono, email);
+    rslt = await librosModel.new(autor, titulo, editorial, numero_paginas, anio_publicacion);
     res.status(200).json(
       {
         status: 'ok',
@@ -93,11 +92,12 @@ router.post('/new', async (req, res) => {
 }); //POST /new
 
 
+//router.put();
 router.put('/update/:id', async (req, res) => {
   try{
-    const { nombres, apellidos, identidad, email, telefono } = req.body;
+    const { autor, titulo, editorial, anio_publicacion, numero_paginas } = req.body;
     const { id } = req.params;
-    const result = await empleadoModel.updateOne(id, nombres, apellidos, identidad, telefono, email);
+    const result = await librosModel.updateOne(id, autor, titulo, editorial, numero_paginas, anio_publicacion);
     res.status(200).json({
       status:'ok',
       result
@@ -112,7 +112,7 @@ router.put('/addtag/:id', async (req, res) => {
   try {
     const { tag } = req.body;
     const { id } = req.params;
-    const result = await empleadoModel.updateAddTag(id, tag);
+    const result = await librosModel.updateAddTag(id, tag);
     res.status(200).json({
       status: 'ok',
       result
@@ -127,7 +127,7 @@ router.put('/addtagset/:id', async (req, res) => {
   try {
     const { tag } = req.body;
     const { id } = req.params;
-    const result = await empleadoModel.updateAddTagSet(id, tag);
+    const result = await librosModel.updateAddTagSet(id, tag);
     res.status(200).json({
       status: 'ok',
       result
@@ -142,7 +142,7 @@ router.put('/removetag/:id', async (req, res) => {
   try {
     const { tag } = req.body;
     const { id } = req.params;
-    const result = await empleadoModel.updatePopTag(id, tag);
+    const result = await librosModel.updatePopTag(id, tag);
     res.status(200).json({
       status: 'ok',
       result
@@ -157,7 +157,7 @@ router.put('/removetag/:id', async (req, res) => {
 router.delete('/delete/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await empleadoModel.deleteOne(id);
+    const result = await librosModel.deleteOne(id);
     res.status(200).json({
       status: 'ok',
       result

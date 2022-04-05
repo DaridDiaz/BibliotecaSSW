@@ -1,0 +1,101 @@
+const getDb = require('../db');
+let db = null;
+class Libros {
+
+  constructor() {
+    getDb()
+    .then( (database) => {
+      db = database;
+      if (process.env.MIGRATE === 'true') {
+        const createStatement = 'CREATE TABLE IF NOT EXISTS libros (id INTEGER PRIMARY KEY AUTOINCREMENT, autor TEXT, titulo TEXT, editorial TEXT, anio_publicacion TEXT, numero_paginas TEXT);';
+        db.run(createStatement);
+      }
+    })
+    .catch((err) => { console.error(err)});
+  }
+
+  new ( titulos, editorial, autor, numero_paginas, anio_publicacion) {
+    return new Promise( (accept, reject)=> {
+      db.run(
+        'INSERT INTO libros (autor, titulo, editorial, anio_publicacion, numero_paginas) VALUES (?, ?, ?, ?, ?);',
+        [autor, titulos, editorial, anio_publicacion, numero_paginas],
+        function (err) {
+          if(err) {
+            console.error(err);
+            reject(err);
+          }
+          accept(this.lastID);
+        }
+      );
+    });
+  }
+
+  getAll () {
+    return new Promise ( (accept, reject) => {
+      db.all('SELECT * from libros;', (err, rows) => {
+        if(err){
+          console.error(err);
+          reject(err);
+        } else {
+          accept(rows);
+        }
+      });
+    });
+  }
+
+  getById(id) {
+    return new Promise((accept, reject) => {
+      db.get(
+        'SELECT * from libros where id=?;',
+        [id],
+        (err, row) => {
+        if (err) {
+          console.error(err);
+          reject(err);
+        } else {
+          accept(row);
+        }
+      });
+    });
+  }
+
+  updateOne (id, titulos, editorial, autor, numero_paginas, anio_publicacion) {
+    return new Promise(
+      (accept, reject) => {
+        const sqlUpdate = 'UPDATE libros set titulo = ?, editorial = ?, numero_paginas = ?, autor = ?, anio_publicacion = ? where id = ?;';
+        db.run(
+          sqlUpdate,
+          [titulos, editorial, numero_paginas, autor, anio_publicacion, id],
+          function (err) {
+            if(err){
+              reject(err);
+            } else {
+              accept(this);
+            }
+          }
+        );
+      }
+    );
+  }
+
+  deleteOne(id) {
+    return new Promise(
+      (accept, reject) => {
+        const sqlDelete = 'DELETE FROM libros where id = ?;';
+        db.run(
+          sqlDelete,
+          [id],
+          function (err) {
+            if (err) {
+              reject(err);
+            } else {
+              accept(this);
+            }
+          }
+        );
+      }
+    );
+  }
+}
+
+module.exports = libros;

@@ -1,0 +1,101 @@
+const getDb = require('../db');
+let db = null;
+class Prestamos {
+
+  constructor() {
+    getDb()
+    .then( (database) => {
+      db = database;
+      if (process.env.MIGRATE === 'true') {
+        const createStatement = 'CREATE TABLE IF NOT EXISTS prestamos (id INTEGER PRIMARY KEY AUTOINCREMENT, usuario TEXT, empleado TEXT, libro TEXT, fecha_prestamo TEXT, fecha_devuelto TEXT);';
+        db.run(createStatement);
+      }
+    })
+    .catch((err) => { console.error(err)});
+  }
+
+  new ( empleados, libro, usuario, fecha_devuelto, fecha_prestamo) {
+    return new Promise( (accept, reject)=> {
+      db.run(
+        'INSERT INTO prestamos (usuario, empleado, libro, fecha_prestamo, fecha_devuelto) VALUES (?, ?, ?, ?, ?);',
+        [usuario, empleados, libro, fecha_prestamo, fecha_devuelto],
+        function (err) {
+          if(err) {
+            console.error(err);
+            reject(err);
+          }
+          accept(this.lastID);
+        }
+      );
+    });
+  }
+
+  getAll () {
+    return new Promise ( (accept, reject) => {
+      db.all('SELECT * from prestamos;', (err, rows) => {
+        if(err){
+          console.error(err);
+          reject(err);
+        } else {
+          accept(rows);
+        }
+      });
+    });
+  }
+
+  getById(id) {
+    return new Promise((accept, reject) => {
+      db.get(
+        'SELECT * from prestamos where id=?;',
+        [id],
+        (err, row) => {
+        if (err) {
+          console.error(err);
+          reject(err);
+        } else {
+          accept(row);
+        }
+      });
+    });
+  }
+
+  updateOne (id, empleados, libro, usuario, fecha_devuelto, fecha_prestamo) {
+    return new Promise(
+      (accept, reject) => {
+        const sqlUpdate = 'UPDATE prestamos set empleado = ?, libro = ?, fecha_devuelto = ?, usuario = ?, fecha_prestamo = ? where id = ?;';
+        db.run(
+          sqlUpdate,
+          [empleados, libro, fecha_devuelto, usuario, fecha_prestamo, id],
+          function (err) {
+            if(err){
+              reject(err);
+            } else {
+              accept(this);
+            }
+          }
+        );
+      }
+    );
+  }
+
+  deleteOne(id) {
+    return new Promise(
+      (accept, reject) => {
+        const sqlDelete = 'DELETE FROM prestamos where id = ?;';
+        db.run(
+          sqlDelete,
+          [id],
+          function (err) {
+            if (err) {
+              reject(err);
+            } else {
+              accept(this);
+            }
+          }
+        );
+      }
+    );
+  }
+}
+
+module.exports = Prestamos;

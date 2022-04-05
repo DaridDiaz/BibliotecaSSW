@@ -8,6 +8,7 @@ const getDb = async () => {
   if (db) {
      return db;
   }
+  
   if (!client) {
     client = await MongoClient.connect(process.env.MONGOURI , {
       useNewUrlParser: true,

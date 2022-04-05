@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
 
-const Empleados = require('../../../../dao/empleados/empleados.model');
-const empleadoModel = new Empleados();
+const Prestamos = require('../../../../dao/prestamos/prestamos.model');
+const prestamoModel = new Prestamos();
 
 router.get('/', (req, res) => {
   res.status(200).json(
     {
-      endpoint: 'Empleados',
+      endpoint: 'Prestamos',
       updates: new Date(2022,0,19,18,41,0)
     }
   );
@@ -16,8 +16,8 @@ router.get('/', (req, res) => {
 router.get('/all', async (req, res) => {
   try {
     console.log("User Request", req.user);
-    const rows = await empleadoModel.getAll();
-    res.status(200).json({status:'ok', empleados: rows});
+    const rows = await prestamoModel.getAll();
+    res.status(200).json({status:'ok', prestamos: rows});
   } catch (ex) {
     console.log(ex);
     res.status(500).json({status:'failed'});
@@ -28,8 +28,8 @@ router.get('/all', async (req, res) => {
 router.get('/byid/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const row = await empleadoModel.getById(id);
-    res.status(200).json({ status: 'ok', empleado: row });
+    const row = await prestamoModel.getById(id);
+    res.status(200).json({ status: 'ok', prestamo: row });
   } catch (ex) {
     console.log(ex);
     res.status(500).json({ status: 'failed' });
@@ -43,8 +43,8 @@ router.get('/facet/:page/:items', async (req, res) => {
   const items = parseInt(req.params.items, 10);
   if (allowedItemsNumber.includes(items)) {
     try {
-      const empleados = await empleadoModel.getFaceted(page, items);
-      res.status(200).json({docs:empleados});
+      const prestamos = await prestamoModel.getFaceted(page, items);
+      res.status(200).json({docs:prestamos});
     } catch (ex) {
       console.log(ex);
       res.status(500).json({ status: 'failed' });
@@ -55,28 +55,10 @@ router.get('/facet/:page/:items', async (req, res) => {
 
 });
 
-router.get('/byname/:name/:page/:items', async (req, res) => {
-  const name = req.params.name;
-  const page = parseInt(req.params.page, 10);
-  const items = parseInt(req.params.items, 10);
-  if (allowedItemsNumber.includes(items)) {
-    try {
-      const empleados = await empleadoModel.getFaceted(page, items, {nombres: name});
-      res.status(200).json({ docs: empleados });
-    } catch (ex) {
-      console.log(ex);
-      res.status(500).json({ status: 'failed' });
-    }
-  } else {
-    return res.status(403).json({ status: 'error', msg: 'Not a valid item value (10,15,20)' });
-  }
-
-});
-
 router.post('/new', async (req, res) => {
-  const { nombres, apellidos, identidad, email, telefono } = req.body;
+  const { usuario, empleado, libro, fecha_prestamo, fecha_devuelto } = req.body;
   try {
-    rslt = await empleadoModel.new(nombres, apellidos, identidad, telefono, email);
+    rslt = await prestamoModel.new(usuario, empleado, libro, fecha_devuelto, fecha_prestamo);
     res.status(200).json(
       {
         status: 'ok',
@@ -95,9 +77,9 @@ router.post('/new', async (req, res) => {
 
 router.put('/update/:id', async (req, res) => {
   try{
-    const { nombres, apellidos, identidad, email, telefono } = req.body;
+    const { usuario, empleado, libro, fecha_prestamo, fecha_devuelto } = req.body;
     const { id } = req.params;
-    const result = await empleadoModel.updateOne(id, nombres, apellidos, identidad, telefono, email);
+    const result = await prestamoModel.updateOne(id, usuario, empleado, libro, fecha_devuelto, fecha_prestamo);
     res.status(200).json({
       status:'ok',
       result
@@ -112,7 +94,7 @@ router.put('/addtag/:id', async (req, res) => {
   try {
     const { tag } = req.body;
     const { id } = req.params;
-    const result = await empleadoModel.updateAddTag(id, tag);
+    const result = await prestamoModel.updateAddTag(id, tag);
     res.status(200).json({
       status: 'ok',
       result
@@ -127,7 +109,7 @@ router.put('/addtagset/:id', async (req, res) => {
   try {
     const { tag } = req.body;
     const { id } = req.params;
-    const result = await empleadoModel.updateAddTagSet(id, tag);
+    const result = await prestamoModel.updateAddTagSet(id, tag);
     res.status(200).json({
       status: 'ok',
       result
@@ -142,7 +124,7 @@ router.put('/removetag/:id', async (req, res) => {
   try {
     const { tag } = req.body;
     const { id } = req.params;
-    const result = await empleadoModel.updatePopTag(id, tag);
+    const result = await prestamoModel.updatePopTag(id, tag);
     res.status(200).json({
       status: 'ok',
       result
@@ -153,11 +135,11 @@ router.put('/removetag/:id', async (req, res) => {
   }
 });
 
-//router.delete();
+
 router.delete('/delete/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await empleadoModel.deleteOne(id);
+    const result = await prestamoModel.deleteOne(id);
     res.status(200).json({
       status: 'ok',
       result
